@@ -81,4 +81,85 @@ public class TaskManager {
         epic.setStatus(Status.IN_PROGRESS);
         return;
     }
+
+    public ArrayList<Task> getAllTasks() {
+        ArrayList<Task> tasksList = new ArrayList<>(taskHashMap.values());
+        return tasksList;
+    }
+
+    public ArrayList<Subtask> getAllSubtasks() {
+        ArrayList<Subtask> subtasksList = new ArrayList<>(subtaskHashMap.values());
+        return subtasksList;
+    }
+
+    public ArrayList<Epic> getAllEpics() {
+        ArrayList<Epic> epicsList = new ArrayList<>(epicHaspMap.values());
+        return epicsList;
+    }
+
+    public void removeAllTasks() {
+        taskHashMap.clear();
+    }
+
+    public void removeAllSubtasks() {
+        ArrayList<Integer> subtasksIds = new ArrayList<>(subtaskHashMap.keySet());
+        for (int id : subtasksIds) {
+            removeSubtaskById(id);
+        }
+    }
+
+    public void removeAllEpics() {
+        ArrayList<Integer> epicsIds = new ArrayList<>(epicHaspMap.keySet());
+        for (int id : epicsIds) {
+            removeEpicById(id);
+        }
+    }
+
+    public void removeById(int id) {
+        if (taskHashMap.containsKey(id)) {
+            taskHashMap.remove(id);
+        } else if (subtaskHashMap.containsKey(id)) {
+            removeSubtaskById(id);
+        } else if (epicHaspMap.containsKey(id)) {
+            removeEpicById(id);
+        } else {
+            System.out.println("There is no task with such id :(");
+        }
+    }
+
+    //    public void removeByIdTask(int id) {
+//        taskHashMap.remove(id);
+//    }
+    public void removeSubtaskById(int id) {
+        Subtask subtask = subtaskHashMap.get(id);
+        int epicId = subtask.getEpicId();
+        Epic epic = epicHaspMap.get(epicId);
+
+        subtasksInEpicHashMap.get(epic).remove(subtask); // удалили подзадачу из эпика
+        subtaskHashMap.remove(id); // удалили подзадачу из общего списка подзадач
+        updateEpicStatus(epic);
+    }
+
+    public void removeEpicById(int id) {
+        Epic epic = epicHaspMap.get(id);
+        ArrayList<Subtask> subtasks = getSubtasksFromEpic(epic);
+        for (Subtask subtask : subtasks) {
+            removeSubtaskById(subtask.getId()); // удаляем подзадачу + удаляем её из эпика
+        }
+        epicHaspMap.remove(id); // удалили эпик из общего списка эпиков
+    }
+
+    public ArrayList<Subtask> getSubtasksFromEpic(Epic epic) {
+        return subtasksInEpicHashMap.get(epic);
+    }
+
+    public Task getTaskById(int id) {
+        return taskHashMap.get(id);
+    }
+    public Subtask getSubtaskById(int id) {
+        return subtaskHashMap.get(id);
+    }
+    public Epic getEpicById(int id) {
+        return epicHaspMap.get(id);
+    }
 }
