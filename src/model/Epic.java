@@ -3,11 +3,11 @@ package model;
 import java.util.ArrayList;
 
 public class Epic extends Task {
-    private ArrayList<Subtask> subtasks;
+    private ArrayList<Integer> subtasksIds;
 
     public Epic(String name, String description) {
         super(name, description, Status.NEW);
-        this.subtasks = new ArrayList<>();
+        this.subtasksIds = new ArrayList<>();
     }
 
     public void setId(int id) {
@@ -22,7 +22,12 @@ public class Epic extends Task {
         super.setStatus(status);
     }
 
-    public void setSubtasks(ArrayList<Subtask> subtasks) {
-        this.subtasks = subtasks;
+    public void setSubtasks(ArrayList<Integer> subtasksIds) {
+        this.subtasksIds = subtasksIds;
     }
+
+    public ArrayList<Integer> getSubtasks() {
+        return subtasksIds;
+    }
+
 }
