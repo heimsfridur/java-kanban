@@ -57,12 +57,12 @@ public class Main {
                 2, Status.DONE, 4);
         taskManager.updateSubtask(newSubtask);
 
-//        taskManager.removeById(0);
-//        taskManager.removeById(6);
-//        taskManager.removeById(2);
+//        taskManager.removeTaskById(0);
+//        taskManager.removeSubtaskById(6);
+//        taskManager.removeEpicById(2);
 
         taskManager.removeAllTasks();
-        taskManager.removeAllSubtasks();
+//        taskManager.removeAllSubtasks();
         taskManager.removeAllEpics();
     }
 }
