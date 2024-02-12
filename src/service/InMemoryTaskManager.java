@@ -45,7 +45,7 @@ public class InMemoryTaskManager implements TaskManager {
         int epicId = subtask.getEpicId();
         Epic epic = epicHashMap.get(epicId);
 
-        epic.getSubtasksIds().add(subtask.getId());// обновила список подтасков в объекте эпика
+        epic.getSubtasksIds().add(subtask.getId()); // обновила список подтасков в объекте эпика
 
         updateEpicStatus(epic);
         currentId++;

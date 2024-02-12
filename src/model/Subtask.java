@@ -17,6 +17,9 @@ public class Subtask extends Task {
     }
 
     public void setId(int id) {
+        if (epicId == id) {
+            throw new IllegalArgumentException("Subtask cannot be its own epic");
+        }
         super.setId(id);
     }
 

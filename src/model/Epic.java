@@ -22,10 +22,6 @@ public class Epic extends Task {
         super.setStatus(status);
     }
 
-    public void setSubtasks(ArrayList<Integer> subtasksIds) {
-        this.subtasksIds = subtasksIds;
-    }
-
     public ArrayList<Integer> getSubtasksIds() {
         return subtasksIds;
     }

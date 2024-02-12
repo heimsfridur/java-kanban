@@ -12,7 +12,6 @@ public class Main {
 
     public static void main(String[] args) {
         System.out.println("Let's start!");
-        //InMemoryTaskManager inMemoryTaskManager = new InMemoryTaskManager();
         TaskManager inMemoryTaskManager = Managers.getDefault();
 
         // 0
