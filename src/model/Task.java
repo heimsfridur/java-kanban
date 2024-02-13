@@ -20,6 +20,10 @@ public class Task {
         this.description = description;
         this.status = status;
     }
+    public Task(String name, String description) {
+        this.name = name;
+        this.description = description;
+    }
 
     public void setId(int id) {
         this.id = id;
@@ -48,5 +52,21 @@ public class Task {
     @Override
     public int hashCode() {
         return Objects.hash(name, description, id, status);
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

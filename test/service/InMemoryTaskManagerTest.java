@@ -111,4 +111,21 @@ class InMemoryTaskManagerTest {
         ArrayList<Subtask> subtasks = taskManager.getAllSubtasks();
         assertEquals(0, subtasks.size(), "The subtask was not deleted.");
     }
+
+    @Test
+    public void shouldUpdateEpic() {
+        TaskManager taskManager = Managers.getDefault();
+        Epic epic1 = new Epic("epic1 name", "epic1 descr");
+        taskManager.createEpic(epic1);
+        int epic1Id = epic1.getId();
+        taskManager.createSubtask(new Subtask("subtask1 name", "subtask1 descr", epic1Id, Status.DONE));
+
+        Epic epic2 = new Epic("epic1 new Name", "epic1 new Descr", epic1Id);
+        taskManager.updateEpic(epic2);
+
+        Epic savedEpic = taskManager.getEpicById(epic1Id);
+        assertEquals(savedEpic.getName(), epic2.getName(), "Epic name was not updated.");
+        assertEquals(savedEpic.getDescription(), epic2.getDescription(), "Epic description was not updated.");
+        assertEquals(epic2, savedEpic, "Epic was not updated.");
+    }
 }

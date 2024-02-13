@@ -7,13 +7,14 @@ import model.Task;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 
 public class InMemoryTaskManager implements TaskManager {
     private int currentId;
     private HashMap<Integer, Task> taskHashMap;
     private HashMap<Integer, Epic> epicHashMap;
     private HashMap<Integer, Subtask> subtaskHashMap;
-    private InMemoryHistoryManager inMemoryHistoryManager;
+    private HistoryManager inMemoryHistoryManager;
 
     public InMemoryTaskManager() {
         this.currentId = 0;
@@ -49,34 +50,6 @@ public class InMemoryTaskManager implements TaskManager {
 
         updateEpicStatus(epic);
         currentId++;
-    }
-
-    public void updateEpicStatus(Epic epic) {
-        ArrayList<Integer> subtasksIds = epic.getSubtasksIds();
-
-        if (subtasksIds.size() == 0) {
-            epic.setStatus(Status.NEW);
-            return;
-        }
-        int newSubtask = 0;
-        int doneSubtasks = 0;
-        for (int subtaskId : subtasksIds) {
-            Status subtaskStatus = subtaskHashMap.get(subtaskId).getStatus();
-            if (subtaskStatus == Status.NEW) {
-                newSubtask++;
-            } else if (subtaskStatus == Status.DONE) {
-                doneSubtasks++;
-            }
-        }
-        if (newSubtask == subtasksIds.size()) {
-            epic.setStatus(Status.NEW);
-            return;
-        }
-        if (doneSubtasks == subtasksIds.size()) {
-            epic.setStatus(Status.DONE);
-            return;
-        }
-        epic.setStatus(Status.IN_PROGRESS);
     }
 
     @Override
@@ -185,8 +158,44 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public ArrayList<Task> getHistory() {
+    public void updateEpic(Epic newEpic) {
+        int epicId = newEpic.getId();
+        Epic oldEpic = epicHashMap.get(epicId);
+        oldEpic.setName(newEpic.getName());
+        oldEpic.setDescription(newEpic.getDescription());
+    }
+
+    @Override
+    public LinkedList<Task> getHistory() {
         return inMemoryHistoryManager.getHistory();
+    }
+
+    private void updateEpicStatus(Epic epic) {
+        ArrayList<Integer> subtasksIds = epic.getSubtasksIds();
+
+        if (subtasksIds.size() == 0) {
+            epic.setStatus(Status.NEW);
+            return;
+        }
+        int newSubtask = 0;
+        int doneSubtasks = 0;
+        for (int subtaskId : subtasksIds) {
+            Status subtaskStatus = subtaskHashMap.get(subtaskId).getStatus();
+            if (subtaskStatus == Status.NEW) {
+                newSubtask++;
+            } else if (subtaskStatus == Status.DONE) {
+                doneSubtasks++;
+            }
+        }
+        if (newSubtask == subtasksIds.size()) {
+            epic.setStatus(Status.NEW);
+            return;
+        }
+        if (doneSubtasks == subtasksIds.size()) {
+            epic.setStatus(Status.DONE);
+            return;
+        }
+        epic.setStatus(Status.IN_PROGRESS);
     }
 
 }

@@ -2,11 +2,11 @@ import model.Epic;
 import model.Status;
 import model.Subtask;
 import model.Task;
-import service.InMemoryTaskManager;
 import service.Managers;
 import service.TaskManager;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 public class Main {
 
@@ -50,7 +50,7 @@ public class Main {
         Subtask subtaskById = inMemoryTaskManager.getSubtaskById(4);
         Epic epicById = inMemoryTaskManager.getEpicById(2);
     //    inMemoryTaskManager.getTaskById(0);
-        ArrayList<Task> history = inMemoryTaskManager.getHistory();
+        LinkedList<Task> history = inMemoryTaskManager.getHistory();
        // Epic epicFromHistory = (Epic) history.get(2);
        // ArrayList<Integer> list = epicFromHistory.getSubtasksIds();
 

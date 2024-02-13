@@ -13,7 +13,7 @@ class ManagersTest {
 
     @Test
     public void inMemoryHistoryManagerIsNotNull() {
-        InMemoryHistoryManager inMemoryHistoryManager = Managers.getDefaultHistory();
+        HistoryManager inMemoryHistoryManager = Managers.getDefaultHistory();
         assertNotNull(inMemoryHistoryManager, "inMemoryManager is null");
     }
 }
