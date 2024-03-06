@@ -7,6 +7,7 @@ import model.Task;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -127,5 +128,49 @@ class InMemoryTaskManagerTest {
         assertEquals(savedEpic.getName(), epic2.getName(), "Epic name was not updated.");
         assertEquals(savedEpic.getDescription(), epic2.getDescription(), "Epic description was not updated.");
         assertEquals(epic2, savedEpic, "Epic was not updated.");
+    }
+
+    @Test
+    public void shouldAddTasksToHistoryAndRemoveThem() {
+        TaskManager taskManager = Managers.getDefault();
+        Task task1 = new Task("task1 name", "task1 descr", Status.NEW);
+        int task1Id = task1.getId();
+        taskManager.createTask(task1);
+
+        Epic epic1 = new Epic("epic1 name", "epic1 descr");
+        taskManager.createEpic(epic1);
+        int epic1Id = epic1.getId();
+
+        Subtask subtask1 = new Subtask("subtask1 name", "subtask1 descr", epic1Id, Status.DONE);
+        taskManager.createSubtask(subtask1);
+        int subtask1Id = subtask1.getId();
+
+        taskManager.getTaskById(task1Id);
+        taskManager.getEpicById(epic1Id);
+        taskManager.getSubtaskById(subtask1Id);
+
+
+        List<Task> history = taskManager.getHistory();
+        assertEquals(3, history.size(), "Number of tasks in history is incorrect.");
+
+        taskManager.removeTaskById(task1Id);
+        taskManager.removeEpicById(epic1Id);
+        history = taskManager.getHistory();
+        assertEquals(0, history.size(), "Tasks were not deleted.");
+    }
+
+    @Test
+    public void shouldAddTaskOnce() {
+        TaskManager taskManager = Managers.getDefault();
+        Task task1 = new Task("task1 name", "task1 descr", Status.NEW);
+        int task1Id = task1.getId();
+        taskManager.createTask(task1);
+
+        taskManager.getTaskById(task1Id);
+        taskManager.getTaskById(task1Id);
+        taskManager.getTaskById(task1Id);
+        List<Task> history = taskManager.getHistory();
+
+        assertEquals(1, history.size(), "Task was added not once.");
     }
 }
