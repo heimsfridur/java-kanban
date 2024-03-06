@@ -1,5 +1,6 @@
 package service;
 
+import model.Node;
 import model.Task;
 
 import java.util.ArrayList;
@@ -82,17 +83,5 @@ public class InMemoryHistoryManager implements HistoryManager {
             curNode = curNode.next;
         }
         return tasks;
-    }
-}
-
-class Node {
-    Task task;
-    Node prev;
-    Node next;
-
-    public Node(Task task) {
-        this.task = task;
-        this.prev = null;
-        this.next = null;
     }
 }
