@@ -22,10 +22,11 @@ public class InMemoryHistoryManager implements HistoryManager {
     public void add(Task task) {
         if (task == null) return;
         if (historyHashmap.get(task.getId()) != null) {
-            remove(task.getId());
+            removeNode(task.getId());
         }
 
         linkLast(task);
+        historyHashmap.put(task.getId(), tail);
     }
 
     @Override
@@ -35,16 +36,10 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     @Override
     public void remove(int id) {
-        Node node = historyHashmap.get(id);
-        if (node != null) {
-            removeNode(node);
-            historyHashmap.remove(id);
-        } else {
-            System.out.println("Task not found.");
-        }
+        removeNode(id);
     }
 
-    public void linkLast(Task task) {
+    private void linkLast(Task task) {
         Node newNode = new Node(task);
 
         if (head == null) {
@@ -54,10 +49,15 @@ public class InMemoryHistoryManager implements HistoryManager {
             newNode.prev = tail;
         }
         tail = newNode;
-        historyHashmap.put(task.getId(), newNode);
     }
 
-    public void removeNode(Node node) {
+    private void removeNode(int id) {
+        final Node node = historyHashmap.remove(id);
+
+        if (node == null) {
+            return;
+        }
+
         if (node == head && node == tail) {
             head = null;
             tail = null;
@@ -75,7 +75,7 @@ public class InMemoryHistoryManager implements HistoryManager {
         node.prev = null;
     }
 
-    public ArrayList<Task> getTasks() {
+    private ArrayList<Task> getTasks() {
         ArrayList<Task> tasks = new ArrayList<>();
         Node curNode = head;
         while (curNode != null) {
