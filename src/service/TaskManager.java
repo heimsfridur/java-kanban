@@ -5,7 +5,7 @@ import model.Subtask;
 import model.Task;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.List;
 
 public interface TaskManager {
     void createTask(Task task);
@@ -46,5 +46,5 @@ public interface TaskManager {
 
     void updateEpic(Epic newEpic);
 
-    LinkedList<Task> getHistory();
+    List<Task> getHistory();
 }

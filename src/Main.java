@@ -6,7 +6,7 @@ import service.Managers;
 import service.TaskManager;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.List;
 
 public class Main {
 
@@ -50,7 +50,7 @@ public class Main {
         Subtask subtaskById = inMemoryTaskManager.getSubtaskById(4);
         Epic epicById = inMemoryTaskManager.getEpicById(2);
     //    inMemoryTaskManager.getTaskById(0);
-        LinkedList<Task> history = inMemoryTaskManager.getHistory();
+        List<Task> history = inMemoryTaskManager.getHistory();
        // Epic epicFromHistory = (Epic) history.get(2);
        // ArrayList<Integer> list = epicFromHistory.getSubtasksIds();
 

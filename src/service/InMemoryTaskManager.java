@@ -7,7 +7,7 @@ import model.Task;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.List;
 
 public class InMemoryTaskManager implements TaskManager {
     private int currentId;
@@ -69,11 +69,17 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void removeAllTasks() {
+        for (Task task : taskHashMap.values()) {
+            inMemoryHistoryManager.remove(task.getId());
+        }
         taskHashMap.clear();
     }
 
     @Override
     public void removeAllSubtasks() {
+        for (Subtask subtask : subtaskHashMap.values()) {
+            inMemoryHistoryManager.remove(subtask.getId());
+        }
         for (Epic epic : epicHashMap.values()) {
             epic.getSubtasksIds().clear();
             updateEpicStatus(epic);
@@ -83,6 +89,11 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void removeAllEpics() {
+        for (Epic epic : epicHashMap.values()) {
+            for (Integer subtaskId : epic.getSubtasksIds()) {
+                inMemoryHistoryManager.remove(subtaskId);
+            }
+        }
         epicHashMap.clear();
         subtaskHashMap.clear();
     }
@@ -90,6 +101,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void removeTaskById(int id) {
         taskHashMap.remove(id);
+        inMemoryHistoryManager.remove(id);
     }
 
     @Override
@@ -100,7 +112,7 @@ public class InMemoryTaskManager implements TaskManager {
         Epic epic = epicHashMap.get(epicId);
 
         epic.getSubtasksIds().remove(Integer.valueOf(id)); // удалили id подзадач из эпика
-
+        inMemoryHistoryManager.remove(id);
         updateEpicStatus(epic);
     }
 
@@ -110,7 +122,9 @@ public class InMemoryTaskManager implements TaskManager {
 
         for (Integer subtaskId : epic.getSubtasksIds()) {
             subtaskHashMap.remove(subtaskId);
+            inMemoryHistoryManager.remove(subtaskId);
         }
+        inMemoryHistoryManager.remove(id);
     }
 
     @Override
@@ -166,7 +180,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public LinkedList<Task> getHistory() {
+    public List<Task> getHistory() {
         return inMemoryHistoryManager.getHistory();
     }
 
