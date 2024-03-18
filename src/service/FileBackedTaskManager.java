@@ -71,7 +71,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             fw.write("\n");
             fw.write(historyToString(super.inMemoryHistoryManager));
         } catch (IOException exc) {
-            throw new ManagerSaveException("Ошибка сохранения в файл.");
+            throw new ManagerSaveException("File saving error.");
         }
     }
 
@@ -80,10 +80,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         if (task instanceof Subtask) {
             epicIdForSubtask += ((Subtask) task).getEpicId();
         }
-        String res = task.getId() + "," + task.getType() + "," + task.getName() + "," +
+        return task.getId() + "," + task.getType() + "," + task.getName() + "," +
                 task.getStatus() + "," + task.getDescription() + "," + epicIdForSubtask + "\n";
-
-        return res;
     }
 
     private static Task fromString(String value) {
@@ -134,16 +132,17 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     static FileBackedTaskManager loadFromFile(File file) {
         FileBackedTaskManager fileBackedTaskManager = new FileBackedTaskManager(file);
-          String[] linesArray  = null;
+          String[] linesArray;
 
         try {
             String str = Files.readString(file.toPath());
             linesArray =  str.split("\n");
         } catch (IOException exc) {
-            throw new ManagerSaveException("Ошибка чтения файла.");
+            throw new ManagerSaveException("File reading error.");
         }
 
         int maxId = 0;
+        int allTasksCount = 0;
 
         for (int i = 1; i < linesArray.length; i++) {
             String line = linesArray[i];
@@ -160,9 +159,10 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 fileBackedTaskManager.subtaskHashMap.put(id, (Subtask) task);
             } else if (task instanceof Epic) {
                 fileBackedTaskManager.epicHashMap.put(id, (Epic) task);
-            } else if (task instanceof Task) {
+            } else {
                 fileBackedTaskManager.taskHashMap.put(id, task);
             }
+            allTasksCount++;
         }
         fileBackedTaskManager.currentId = maxId + 1;
 
@@ -172,17 +172,19 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             epic.getSubtasksIds().add(subtask.getId());
         }
 
-        List<Integer> historyIds = historyFromString(linesArray[linesArray.length - 1]);
-        for (Integer id : historyIds) {
-            if (fileBackedTaskManager.taskHashMap.containsKey(id)) {
-                Task task = fileBackedTaskManager.taskHashMap.get(id);
-                fileBackedTaskManager.inMemoryHistoryManager.add(task);
-            } else if (fileBackedTaskManager.subtaskHashMap.containsKey(id)) {
-                Subtask subtask = fileBackedTaskManager.subtaskHashMap.get(id);
-                fileBackedTaskManager.inMemoryHistoryManager.add(subtask);
-            } else if (fileBackedTaskManager.epicHashMap.containsKey(id)) {
-                Epic epic = fileBackedTaskManager.epicHashMap.get(id);
-                fileBackedTaskManager.inMemoryHistoryManager.add(epic);
+        if (linesArray.length > allTasksCount + 1) {
+            List<Integer> historyIds = historyFromString(linesArray[linesArray.length - 1]);
+            for (Integer id : historyIds) {
+                if (fileBackedTaskManager.taskHashMap.containsKey(id)) {
+                    Task task = fileBackedTaskManager.taskHashMap.get(id);
+                    fileBackedTaskManager.inMemoryHistoryManager.add(task);
+                } else if (fileBackedTaskManager.subtaskHashMap.containsKey(id)) {
+                    Subtask subtask = fileBackedTaskManager.subtaskHashMap.get(id);
+                    fileBackedTaskManager.inMemoryHistoryManager.add(subtask);
+                } else if (fileBackedTaskManager.epicHashMap.containsKey(id)) {
+                    Epic epic = fileBackedTaskManager.epicHashMap.get(id);
+                    fileBackedTaskManager.inMemoryHistoryManager.add(epic);
+                }
             }
         }
 
