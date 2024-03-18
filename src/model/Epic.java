@@ -31,4 +31,12 @@ public class Epic extends Task {
         return subtasksIds;
     }
 
+    public void setSubtasksIds(ArrayList<Integer> subtasksIds) {
+        this.subtasksIds = subtasksIds;
+    }
+
+    @Override
+    public TaskType getType() {
+        return TaskType.EPIC;
+    }
 }

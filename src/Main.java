@@ -64,12 +64,7 @@ public class Main {
                 2, Status.DONE, 4);
         inMemoryTaskManager.updateSubtask(newSubtask);
 
-//        taskManager.removeTaskById(0);
-//        taskManager.removeSubtaskById(6);
-//        taskManager.removeEpicById(2);
-
         inMemoryTaskManager.removeAllTasks();
-//        taskManager.removeAllSubtasks();
         inMemoryTaskManager.removeAllEpics();
     }
 }
