@@ -19,7 +19,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     public static void main(String[] args) {
-        File file = new File("src/dataForLoading.csv");
+        File file = new File("src/data.csv");
         FileBackedTaskManager fileBackedTaskManager = new FileBackedTaskManager(file);
 
         // 0
@@ -168,8 +168,22 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
         for (Subtask subtask : fileBackedTaskManager.getAllSubtasks()) {
             int epicId = subtask.getEpicId();
-            Epic epic = fileBackedTaskManager.getEpicById(epicId);
+            Epic epic = fileBackedTaskManager.epicHashMap.get(epicId);
             epic.getSubtasksIds().add(subtask.getId());
+        }
+
+        List<Integer> historyIds = historyFromString(linesArray[linesArray.length - 1]);
+        for (Integer id : historyIds) {
+            if (fileBackedTaskManager.taskHashMap.containsKey(id)) {
+                Task task = fileBackedTaskManager.taskHashMap.get(id);
+                fileBackedTaskManager.inMemoryHistoryManager.add(task);
+            } else if (fileBackedTaskManager.subtaskHashMap.containsKey(id)) {
+                Subtask subtask = fileBackedTaskManager.subtaskHashMap.get(id);
+                fileBackedTaskManager.inMemoryHistoryManager.add(subtask);
+            } else if (fileBackedTaskManager.epicHashMap.containsKey(id)) {
+                Epic epic = fileBackedTaskManager.epicHashMap.get(id);
+                fileBackedTaskManager.inMemoryHistoryManager.add(epic);
+            }
         }
 
         return fileBackedTaskManager;
