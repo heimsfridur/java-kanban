@@ -93,21 +93,18 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         String description = taskPartsArray[4];
 
         switch (type) {
-            case TASK:
-                return new Task(name, description, status, id);
             case SUBTASK:
                 int epicId = Integer.parseInt(taskPartsArray[5]);
                 return new Subtask(name, description, epicId, status, id);
             case EPIC:
                 Epic epic = new Epic(name, description, id);
-                epic.setSubtasksIds(new ArrayList<>());
                 return epic;
             default:
-                return null;
+                return new Task(name, description, status, id);
         }
     }
 
-    static String historyToString(HistoryManager manager) {
+    private static String historyToString(HistoryManager manager) {
         List<String> idsList = new ArrayList<>();
 
         List<Task> history = manager.getHistory();
@@ -120,7 +117,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
 
 
-    static List<Integer> historyFromString(String value) {
+    private static List<Integer> historyFromString(String value) {
         List<Integer> idsInHistory = new ArrayList<>();
         String[] idsArray = value.split(",");
 
@@ -130,7 +127,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         return idsInHistory;
     }
 
-    static FileBackedTaskManager loadFromFile(File file) {
+    public static FileBackedTaskManager loadFromFile(File file) {
         FileBackedTaskManager fileBackedTaskManager = new FileBackedTaskManager(file);
           String[] linesArray;
 
