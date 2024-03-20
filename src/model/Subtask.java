@@ -32,4 +32,9 @@ public class Subtask extends Task {
     public Status getStatus() {
         return super.getStatus();
     }
+
+    @Override
+    public TaskType getType() {
+        return TaskType.SUBTASK;
+    }
 }
