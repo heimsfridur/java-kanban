@@ -1,6 +1,5 @@
 package service;
 
-import com.sun.source.tree.Tree;
 import exceptions.TaskOverlappingException;
 import model.Epic;
 import model.Status;
@@ -181,8 +180,8 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void updateSubtask(Subtask newSubtask) {
-        subtaskHashMap.put(newSubtask.getId(), newSubtask); // заменила старую подзадачу на новую в списке подзадач
         addToPrioritizedTasks(newSubtask);
+        subtaskHashMap.put(newSubtask.getId(), newSubtask); // заменила старую подзадачу на новую в списке подзадач
 
         Epic epic = epicHashMap.get(newSubtask.getEpicId());
         updateEpicStatus(epic);
@@ -245,14 +244,22 @@ public class InMemoryTaskManager implements TaskManager {
 
     private void addToPrioritizedTasks(Task task) {
         if (task.getStartTime() != null) {
-            if (validateOverlapping(task)) {
-                throw new TaskOverlappingException("Tasks are overlapping.");
+            //удаляем объект из TreeSet (на случай обновления тасков)
+            int id = task.getId();
+            Task oldTask = null;
+
+            if (task instanceof Subtask) {
+                oldTask = subtaskHashMap.get(id);
+            } else if (task instanceof Task) {
+                oldTask = taskHashMap.get(id);
             }
 
-            //удаляем объект из TreeSet (на случай обновления тасков)
-            Task oldTask = taskHashMap.get(task.getId());
             if (oldTask != null)  {
                 prioritizedTasks.remove(oldTask);
+            }
+
+            if (validateOverlapping(task)) {
+                throw new TaskOverlappingException("Tasks are overlapping.");
             }
 
             prioritizedTasks.add(task);
@@ -267,8 +274,8 @@ public class InMemoryTaskManager implements TaskManager {
                     LocalDateTime taskStart = task.getStartTime();
                     LocalDateTime taskEnd = task.getEndTime();
 
-                    return taskForCheckStart.isBefore(taskEnd) && taskForCheckEnd.isAfter(taskEnd) ||
-                            taskStart.isBefore(taskForCheckEnd) && taskEnd.isAfter(taskForCheckEnd);
+                    return taskForCheckStart.isBefore(taskEnd) && !taskForCheckEnd.isBefore(taskEnd) ||
+                            taskStart.isBefore(taskForCheckEnd) && !taskEnd.isBefore(taskForCheckEnd);
                 });
 
         return isOverlapping;
