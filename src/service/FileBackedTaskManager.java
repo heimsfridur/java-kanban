@@ -11,7 +11,9 @@ import java.nio.file.Files;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
     private File saveFile;
@@ -128,13 +130,9 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
 
     private static List<Integer> historyFromString(String value) {
-        List<Integer> idsInHistory = new ArrayList<>();
-        String[] idsArray = value.split(",");
-
-        for (String id : idsArray) {
-            idsInHistory.add(Integer.parseInt(id));
-        }
-        return idsInHistory;
+        return Arrays.stream(value.split(","))
+                .map(Integer::parseInt)
+                .collect(Collectors.toList());
     }
 
     public static FileBackedTaskManager loadFromFile(File file) {

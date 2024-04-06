@@ -10,6 +10,7 @@ import model.Task;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class InMemoryTaskManager implements TaskManager {
     protected int currentId;
@@ -145,11 +146,9 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public ArrayList<Subtask> getSubtasksFromEpic(Epic epic) {
-        ArrayList<Subtask> subtasks = new ArrayList<>();
-        for (int id : epic.getSubtasksIds()) {
-            subtasks.add(subtaskHashMap.get(id));
-        }
-        return subtasks;
+        return epic.getSubtasksIds().stream()
+                .map(id -> subtaskHashMap.get(id))
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     @Override
@@ -204,31 +203,15 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     protected void updateEpicStatus(Epic epic) {
-        ArrayList<Integer> subtasksIds = epic.getSubtasksIds();
-
-        if (subtasksIds.size() == 0) {
-            epic.setStatus(Status.NEW);
-            return;
-        }
-        int newSubtask = 0;
-        int doneSubtasks = 0;
-        for (int subtaskId : subtasksIds) {
-            Status subtaskStatus = subtaskHashMap.get(subtaskId).getStatus();
-            if (subtaskStatus == Status.NEW) {
-                newSubtask++;
-            } else if (subtaskStatus == Status.DONE) {
-                doneSubtasks++;
-            }
-        }
-        if (newSubtask == subtasksIds.size()) {
-            epic.setStatus(Status.NEW);
-            return;
-        }
-        if (doneSubtasks == subtasksIds.size()) {
+        if (epic.getSubtasksIds().stream()
+                .allMatch(id -> Status.DONE.equals(subtaskHashMap.get(id).getStatus()))) {
             epic.setStatus(Status.DONE);
-            return;
+        } else if (epic.getSubtasksIds().stream()
+                .allMatch(id -> Status.NEW.equals(subtaskHashMap.get(id).getStatus()))) {
+            epic.setStatus(Status.NEW);
+        } else {
+            epic.setStatus(Status.IN_PROGRESS);
         }
-        epic.setStatus(Status.IN_PROGRESS);
     }
 
     protected void updateEpicTime(Epic epic) {
