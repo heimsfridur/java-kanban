@@ -25,7 +25,8 @@ public class InMemoryTaskManager implements TaskManager {
         this.epicHashMap = new HashMap<>();
         this.subtaskHashMap = new HashMap<>();
         this.inMemoryHistoryManager = Managers.getDefaultHistory();
-        this.prioritizedTasks = new TreeSet<>(Comparator.comparing(Task::getStartTime));
+        this.prioritizedTasks = new TreeSet<>(Comparator.comparing(Task::getStartTime,
+                Comparator.nullsLast(Comparator.naturalOrder())).thenComparing(Task::getId));
     }
 
     @Override
@@ -174,12 +175,14 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void updateTask(Task task) {
+        prioritizedTasks.remove(taskHashMap.get(task.getId()));
         addToPrioritizedTasks(task);
         taskHashMap.put(task.getId(), task);
     }
 
     @Override
     public void updateSubtask(Subtask newSubtask) {
+        prioritizedTasks.remove(subtaskHashMap.get(newSubtask.getId()));
         addToPrioritizedTasks(newSubtask);
         subtaskHashMap.put(newSubtask.getId(), newSubtask); // заменила старую подзадачу на новую в списке подзадач
 
@@ -245,7 +248,7 @@ public class InMemoryTaskManager implements TaskManager {
     private void addToPrioritizedTasks(Task task) {
         if (task.getStartTime() != null) {
             //удаляем объект из TreeSet (на случай обновления тасков)
-            int id = task.getId();
+            /*int id = task.getId();
             Task oldTask = null;
 
             if (task instanceof Subtask) {
@@ -256,7 +259,7 @@ public class InMemoryTaskManager implements TaskManager {
 
             if (oldTask != null)  {
                 prioritizedTasks.remove(oldTask);
-            }
+            } */
 
             if (validateOverlapping(task)) {
                 throw new TaskOverlappingException("Tasks are overlapping.");
