@@ -52,8 +52,6 @@ public class InMemoryHistoryManager implements HistoryManager {
     }
 
     private void removeNode(Node node) {
-        //final Node node = historyHashmap.remove(id);
-
         if (node == null) {
             return;
         }
