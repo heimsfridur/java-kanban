@@ -2,6 +2,8 @@ package server;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+
 import model.Epic;
 import model.Status;
 import model.Subtask;
@@ -9,6 +11,8 @@ import model.Task;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import server.adapters.DurationAdapter;
+import server.adapters.LocalDateTimeAdapter;
 import service.Managers;
 import service.TaskManager;
 
@@ -29,6 +33,8 @@ public class HttpTaskServerTest {
 
     private Gson gson = new GsonBuilder()
         .setPrettyPrinting()
+        .registerTypeAdapter(Duration.class, new DurationAdapter())
+        .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
         .create();
     private Task task1;
     private Task task2;
@@ -80,6 +86,12 @@ public class HttpTaskServerTest {
                 .build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
+        HttpRequest request2 = HttpRequest.newBuilder()
+                .DELETE()
+                .uri(URI.create("http://localhost:8080/tasks/0"))
+                .build();
+        client.send(request2, HttpResponse.BodyHandlers.ofString());
+
         assertEquals(200, response.statusCode(), "StatusCode is incorrect.");
 
         ArrayList<Task> tasksAfterDeletion = taskManager.getAllTasks();
@@ -122,5 +134,22 @@ public class HttpTaskServerTest {
         ArrayList<Subtask> subtasksAfterTheOnlyEpicDeletion = taskManager.getAllSubtasks();
         assertEquals(0, subtasksAfterTheOnlyEpicDeletion.size(), "Subtasks were not" +
                 "deleted after epic deletion.");
+    }
+
+    @Test
+    public void shouldGetAllTasks() throws IOException, InterruptedException {
+        HttpClient client = HttpClient.newHttpClient();
+        URI uri = URI.create("http://localhost:8080/tasks");
+        HttpRequest request = HttpRequest.newBuilder()
+                .GET()
+                .uri(uri)
+                .build();
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        assertEquals(200, response.statusCode(), "StatusCode is incorrect.");
+
+        ArrayList<Task> tasks = gson.fromJson(response.body(), new TypeToken<ArrayList<Task>>(){}.getType());
+
+        assertEquals(2, tasks.size(), "Number of tasks is incorrect.");
     }
 }

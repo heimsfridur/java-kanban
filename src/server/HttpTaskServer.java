@@ -1,31 +1,75 @@
 package server;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
+import model.Epic;
+import model.Status;
+import model.Subtask;
+import model.Task;
+import server.adapters.DurationAdapter;
+import server.adapters.LocalDateTimeAdapter;
 import service.Managers;
 import service.TaskManager;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.Optional;
 
 public class HttpTaskServer {
     private HttpServer httpServer;
     private static final int PORT = 8080;
     protected TaskManager taskManager;
 
-    Gson gson;
+    protected static Gson gson;
 
     public HttpTaskServer(TaskManager taskManager) throws IOException {
         this.taskManager = taskManager;
+        this.gson = new GsonBuilder()
+                .setPrettyPrinting()
+                .registerTypeAdapter(Duration.class, new DurationAdapter())
+                .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+                .create();
     }
 
     public HttpTaskServer() throws IOException {
         this.taskManager = Managers.getDefault();
+        this.gson = new GsonBuilder()
+                .setPrettyPrinting()
+                .registerTypeAdapter(Duration.class, new DurationAdapter())
+                .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+                .create();
     }
 
+
     public static void main(String[] args) throws IOException {
-        HttpTaskServer server = new HttpTaskServer();
+        TaskManager taskManager = Managers.getDefault();
+        HttpTaskServer server = new HttpTaskServer(taskManager);
         server.start();
+
+        //0
+        Task task1 = new Task("task1", "task1_descr", Status.NEW,
+                LocalDateTime.of(2024, 4, 16, 12, 30), Duration.ofMinutes(30));
+        taskManager.createTask(task1);
+        //1
+        Task task2 = new Task("task2", "task2_descr", Status.NEW,
+                LocalDateTime.of(2024, 4, 28, 2, 30), Duration.ofMinutes(20));
+        taskManager.createTask(task2);
+        //2
+        Epic epic1 = new Epic("epic1", "epic1_descr");
+        taskManager.createEpic(epic1);
+        int epic1Id = epic1.getId();
+        //3
+        Subtask subtask1Epic1 = new Subtask("subtask1Epic1", "subtask1Epic1_descr", epic1Id, Status.DONE,
+                LocalDateTime.of(2024, 4, 10, 15, 0), Duration.ofMinutes(5));
+        taskManager.createSubtask(subtask1Epic1);
+        //4
+        Subtask subtask2Epic1 = new Subtask("subtask2Epic1", "subtask2Epic1_descr", epic1Id, Status.NEW,
+                LocalDateTime.of(2024, 4, 16, 19, 30), Duration.ofMinutes(120));
+        taskManager.createSubtask(subtask2Epic1);
     }
 
     public void start() throws IOException {

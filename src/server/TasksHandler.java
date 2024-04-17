@@ -1,12 +1,16 @@
 package server;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import server.adapters.DurationAdapter;
+import static server.HttpTaskServer.gson;
 import service.TaskManager;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.URI;
+import java.time.Duration;
 import java.util.regex.Pattern;
 
 public class TasksHandler implements HttpHandler {
@@ -27,6 +31,15 @@ public class TasksHandler implements HttpHandler {
 
             switch (method) {
                 case "GET":
+                    if (Pattern.matches("^/tasks$", path)) {
+                        response = gson.toJson(taskManager.getAllTasks());
+
+                    } else if (Pattern.matches("^/tasks/\\d+$", path)) {
+                        System.out.println("lol");
+                    } else {
+                        statusCode = 405;
+                        response = "There is no such endpoint for GET method.";
+                    }
                     break;
                 case "POST":
                     break;
@@ -41,6 +54,9 @@ public class TasksHandler implements HttpHandler {
                             taskManager.removeTaskById(id);
                             response = "Task with ID " + id + " was deleted.";
                         }
+                    } else {
+                        statusCode = 405;
+                        response = "There is no such endpoint for DELETE method.";
                     }
                     break;
                 default: {
@@ -50,6 +66,8 @@ public class TasksHandler implements HttpHandler {
                 }
             }
         } catch (Exception exc) {
+            statusCode = 405;
+            response = "Something went wrong. Please check your url and task id.";
             exc.printStackTrace();
         }
 
