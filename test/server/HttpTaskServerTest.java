@@ -251,7 +251,6 @@ public class HttpTaskServerTest {
     }
 
     @Test
-
     public void shouldGetSubtasksFromEpic() throws IOException, InterruptedException {
         HttpClient client = HttpClient.newHttpClient();
         URI uri = URI.create("http://localhost:8080/epics/2/subtasks");
@@ -269,4 +268,56 @@ public class HttpTaskServerTest {
         assertEquals(subtasksExpected, subtasksActual, "Subtasks from epic are incorrect.");
     }
 
+    @Test
+    public void shouldCreateNewTask() throws IOException, InterruptedException {
+        //5
+        Task task3 = new Task("task3", "task3_descr", Status.IN_PROGRESS,
+                LocalDateTime.of(2028, 4, 16, 12, 30), Duration.ofMinutes(30));
+
+        HttpClient client = HttpClient.newHttpClient();
+        URI uri = URI.create("http://localhost:8080/tasks");
+        HttpRequest request = HttpRequest.newBuilder()
+                .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(task3)))
+                .uri(uri)
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        assertEquals(201, response.statusCode(), "StatusCode is incorrect.");
+    }
+    @Test
+    public void shouldNotCreateOverlappingTasks() throws IOException, InterruptedException {
+        //5
+        Task task3 = new Task("task3", "task3_descr", Status.IN_PROGRESS,
+                LocalDateTime.of(2024, 4, 16, 12, 33), Duration.ofMinutes(30));
+
+        HttpClient client = HttpClient.newHttpClient();
+        URI uri = URI.create("http://localhost:8080/tasks");
+        HttpRequest request = HttpRequest.newBuilder()
+                .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(task3)))
+                .uri(uri)
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        assertEquals(406, response.statusCode(), "StatusCode is incorrect.");
+    }
+
+    @Test
+    public void shouldUpdateTasks() throws IOException, InterruptedException {
+        //5
+        Task task1New = new Task("task1_new", "task1_new", Status.IN_PROGRESS, 0,
+                LocalDateTime.of(2028, 4, 16, 12, 33), Duration.ofMinutes(30));
+
+        HttpClient client = HttpClient.newHttpClient();
+        URI uri = URI.create("http://localhost:8080/tasks");
+        HttpRequest request = HttpRequest.newBuilder()
+                .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(task1New)))
+                .uri(uri)
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        assertEquals(201, response.statusCode(), "StatusCode is incorrect.");
+    }
 }

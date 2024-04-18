@@ -27,17 +27,20 @@ public class Task {
         this.status = status;
         this.startTime = startTime;
         this.duration = duration;
+        this.id = -1;
     }
 
     public Task(String name, String description) {
         this.name = name;
         this.description = description;
+        this.id = -1;
     }
 
     public Task(String name, String description, Status status) {
         this.name = name;
         this.description = description;
         this.status = status;
+        this.id = -1;
     }
 
     public void setId(int id) {
