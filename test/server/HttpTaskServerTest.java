@@ -86,12 +86,6 @@ public class HttpTaskServerTest {
                 .build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-        HttpRequest request2 = HttpRequest.newBuilder()
-                .DELETE()
-                .uri(URI.create("http://localhost:8080/tasks/0"))
-                .build();
-        client.send(request2, HttpResponse.BodyHandlers.ofString());
-
         assertEquals(200, response.statusCode(), "StatusCode is incorrect.");
 
         ArrayList<Task> tasksAfterDeletion = taskManager.getAllTasks();
@@ -152,4 +146,127 @@ public class HttpTaskServerTest {
 
         assertEquals(2, tasks.size(), "Number of tasks is incorrect.");
     }
+
+    @Test
+    public void shouldGetAllSubtasks() throws IOException, InterruptedException {
+        HttpClient client = HttpClient.newHttpClient();
+        URI uri = URI.create("http://localhost:8080/subtasks");
+        HttpRequest request = HttpRequest.newBuilder()
+                .GET()
+                .uri(uri)
+                .build();
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        assertEquals(200, response.statusCode(), "StatusCode is incorrect.");
+
+        ArrayList<Task> subtasks = gson.fromJson(response.body(), new TypeToken<ArrayList<Task>>(){}.getType());
+
+        assertEquals(2, subtasks.size(), "Number of tasks is incorrect.");
+    }
+
+    @Test
+    public void shouldGetAllEpics() throws IOException, InterruptedException {
+        HttpClient client = HttpClient.newHttpClient();
+        URI uri = URI.create("http://localhost:8080/epics");
+        HttpRequest request = HttpRequest.newBuilder()
+                .GET()
+                .uri(uri)
+                .build();
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        assertEquals(200, response.statusCode(), "StatusCode is incorrect.");
+
+        ArrayList<Task> epics = gson.fromJson(response.body(), new TypeToken<ArrayList<Task>>(){}.getType());
+
+        assertEquals(1, epics.size(), "Number of epics is incorrect.");
+    }
+
+    @Test
+    public void shouldGetTaskById() throws IOException, InterruptedException {
+        HttpClient client = HttpClient.newHttpClient();
+        URI uri = URI.create("http://localhost:8080/tasks/1");
+        HttpRequest request = HttpRequest.newBuilder()
+                .GET()
+                .uri(uri)
+                .build();
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        assertEquals(200, response.statusCode(), "StatusCode is incorrect.");
+        Task task = gson.fromJson(response.body(), Task.class);
+        assertEquals(task2, task, "Get wrong task.");
+
+        URI uriWithWrongId = URI.create("http://localhost:8080/tasks/100");
+        HttpRequest requestWithWrongId = HttpRequest.newBuilder()
+                .GET()
+                .uri(uriWithWrongId)
+                .build();
+        HttpResponse<String> response2 = client.send(requestWithWrongId, HttpResponse.BodyHandlers.ofString());
+        assertEquals(404, response2.statusCode(), "StatusCode is incorrect.");
+    }
+
+    @Test
+    public void shouldGetSubtaskById() throws IOException, InterruptedException {
+        HttpClient client = HttpClient.newHttpClient();
+        URI uri = URI.create("http://localhost:8080/subtasks/4");
+        HttpRequest request = HttpRequest.newBuilder()
+                .GET()
+                .uri(uri)
+                .build();
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        assertEquals(200, response.statusCode(), "StatusCode is incorrect.");
+        Task subtask = gson.fromJson(response.body(), Subtask.class);
+        assertEquals(subtask2Epic1, subtask, "Get wrong subtask.");
+
+        URI uriWithWrongId = URI.create("http://localhost:8080/subtasks/100");
+        HttpRequest requestWithWrongId = HttpRequest.newBuilder()
+                .GET()
+                .uri(uriWithWrongId)
+                .build();
+        HttpResponse<String> response2 = client.send(requestWithWrongId, HttpResponse.BodyHandlers.ofString());
+        assertEquals(404, response2.statusCode(), "StatusCode is incorrect.");
+    }
+
+    @Test
+    public void shouldGetEpicById() throws IOException, InterruptedException {
+        HttpClient client = HttpClient.newHttpClient();
+        URI uri = URI.create("http://localhost:8080/epics/2");
+        HttpRequest request = HttpRequest.newBuilder()
+                .GET()
+                .uri(uri)
+                .build();
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        assertEquals(200, response.statusCode(), "StatusCode is incorrect.");
+        Epic epic = gson.fromJson(response.body(), Epic.class);
+        assertEquals(epic1, epic, "Get wrong epic.");
+
+        URI uriWithWrongId = URI.create("http://localhost:8080/epics/100");
+        HttpRequest requestWithWrongId = HttpRequest.newBuilder()
+                .GET()
+                .uri(uriWithWrongId)
+                .build();
+        HttpResponse<String> response2 = client.send(requestWithWrongId, HttpResponse.BodyHandlers.ofString());
+        assertEquals(404, response2.statusCode(), "StatusCode is incorrect.");
+    }
+
+    @Test
+
+    public void shouldGetSubtasksFromEpic() throws IOException, InterruptedException {
+        HttpClient client = HttpClient.newHttpClient();
+        URI uri = URI.create("http://localhost:8080/epics/2/subtasks");
+        HttpRequest request = HttpRequest.newBuilder()
+                .GET()
+                .uri(uri)
+                .build();
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        ArrayList<Subtask> subtasksActual = gson.fromJson(response.body(),
+                new TypeToken<ArrayList<Subtask>>(){}.getType());
+        ArrayList<Subtask> subtasksExpected = taskManager.getSubtasksFromEpic(epic1);
+
+        assertEquals(200, response.statusCode(), "StatusCode is incorrect.");
+        assertEquals(subtasksExpected, subtasksActual, "Subtasks from epic are incorrect.");
+    }
+
 }

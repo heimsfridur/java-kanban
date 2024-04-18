@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import model.Task;
 import server.adapters.DurationAdapter;
 import static server.HttpTaskServer.gson;
 import service.TaskManager;
@@ -15,49 +16,29 @@ import java.util.regex.Pattern;
 
 public class TasksHandler implements HttpHandler {
     private TaskManager taskManager;
+    private String response;
+    private int statusCode;
 
     public TasksHandler(TaskManager taskManager) {
         this.taskManager = taskManager;
+        this.response = "";
+        this.statusCode = 200;
     }
 
     @Override
     public void handle(HttpExchange httpExchange) throws IOException  {
-        String response = "";
-        int statusCode = 200;
-
         try {
             String method = httpExchange.getRequestMethod();
             String path = httpExchange.getRequestURI().getPath();
 
             switch (method) {
                 case "GET":
-                    if (Pattern.matches("^/tasks$", path)) {
-                        response = gson.toJson(taskManager.getAllTasks());
-
-                    } else if (Pattern.matches("^/tasks/\\d+$", path)) {
-                        System.out.println("lol");
-                    } else {
-                        statusCode = 405;
-                        response = "There is no such endpoint for GET method.";
-                    }
+                    handleGetTaskMethod(path);
                     break;
                 case "POST":
                     break;
                 case "DELETE":
-                    if (Pattern.matches("^/tasks/\\d+$", path)) {
-                        String pathId = path.replaceFirst("/tasks/", "");
-                        int id = parsePathId(pathId);
-                        if (id == -1) {
-                            statusCode = 405;
-                            response = "The ID " + pathId + " for deletion is incorrect.";
-                        } else {
-                            taskManager.removeTaskById(id);
-                            response = "Task with ID " + id + " was deleted.";
-                        }
-                    } else {
-                        statusCode = 405;
-                        response = "There is no such endpoint for DELETE method.";
-                    }
+                    handleDeleteTaskMethod(path);
                     break;
                 default: {
                     statusCode = 405;
@@ -82,6 +63,49 @@ public class TasksHandler implements HttpHandler {
             return Integer.parseInt(pathId);
         } catch (NumberFormatException exc) {
             return -1;
+        }
+    }
+
+
+    private void handleDeleteTaskMethod(String path) {
+        if (Pattern.matches("^/tasks/\\d+$", path)) {
+            String pathId = path.replaceFirst("/tasks/", "");
+            int id = parsePathId(pathId);
+            if (id == -1) {
+                statusCode = 405;
+                response = "The ID " + pathId + " for deletion is incorrect.";
+            } else {
+                taskManager.removeTaskById(id);
+                response = "Task with ID " + id + " was deleted.";
+            }
+        } else {
+            statusCode = 405;
+            response = "There is no such endpoint for DELETE method.";
+        }
+    }
+
+    private void handleGetTaskMethod(String path) {
+        if (Pattern.matches("^/tasks$", path)) {
+            response = gson.toJson(taskManager.getAllTasks());
+
+        } else if (Pattern.matches("^/tasks/\\d+$", path)) {
+            String pathId = path.replaceFirst("/tasks/", "");
+            int id = parsePathId(pathId);
+            if (id == -1) {
+                statusCode = 405;
+                response = "ID " + pathId + " is incorrect";
+            } else {
+                Task task = taskManager.getTaskById(id);
+                if (task != null) {
+                    response = gson.toJson(task);
+                } else {
+                    statusCode = 404;
+                    response = "Task with ID " + id + " is not found.";
+                }
+            }
+        } else {
+            statusCode = 405;
+            response = "There is no such endpoint for GET method.";
         }
     }
 }
