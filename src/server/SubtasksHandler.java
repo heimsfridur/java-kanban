@@ -1,15 +1,20 @@
 package server;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import exceptions.TaskOverlappingException;
 import model.Subtask;
 import model.Task;
 import service.TaskManager;
 import static server.HttpTaskServer.gson;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
 
 import static server.HttpTaskServer.gson;
@@ -36,7 +41,7 @@ public class SubtasksHandler implements HttpHandler {
                     handleGetSubtaskMethod(path);
                     break;
                 case "POST":
-
+                    handlePostSubtaskMethod(httpExchange);
                     break;
                 case "DELETE":
                     handleDeleteTaskMethod(path);
@@ -102,6 +107,41 @@ public class SubtasksHandler implements HttpHandler {
         } else {
             statusCode = 405;
             response = "There is no such endpoint for GET method.";
+        }
+    }
+
+    public void handlePostSubtaskMethod(HttpExchange httpExchange) throws IOException {
+        String path = httpExchange.getRequestURI().getPath();
+
+        if (path.split("/").length == 2) {
+            InputStream inputStream = httpExchange.getRequestBody();
+            String body = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+            if (body.isEmpty()) {
+                statusCode = 400;
+                response = "Body request is empty.";
+            } else {
+                try {
+                    JsonObject jsonObject = JsonParser.parseString(body).getAsJsonObject();
+                    Subtask subtask = gson.fromJson(body, Subtask.class);
+
+                    if (jsonObject.has("id") && subtask.getId() != -1) {
+                        int subtaskId = subtask.getId();
+                        taskManager.updateSubtask(subtask);
+                        response = "Subtask with ID " + subtaskId + " was updated.";
+                    } else {
+                        taskManager.createSubtask(subtask);
+                        response = "Subtask was created.";
+                    }
+                    statusCode = 201;
+
+                } catch (TaskOverlappingException exc) {
+                    statusCode = 406;
+                    response = "Can't create or update subtask. It overlaps with another task.";
+                }
+            }
+        } else {
+            statusCode = 405;
+            response = "There is no such endpoint for POST method.";
         }
     }
 }

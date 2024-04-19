@@ -1,7 +1,10 @@
 package server;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import exceptions.TaskOverlappingException;
 import model.Epic;
 import model.Subtask;
 import model.Task;
@@ -9,7 +12,9 @@ import service.TaskManager;
 import static server.HttpTaskServer.gson;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
 
@@ -37,6 +42,7 @@ public class EpicsHandler implements HttpHandler {
                     handleGetEpicMethod(path);
                     break;
                 case "POST":
+                    handlePostEpicMethod(httpExchange);
                     break;
                 case "DELETE":
                     handleDeleteEpicMethod(path);
@@ -121,4 +127,37 @@ public class EpicsHandler implements HttpHandler {
             response = "There is no such endpoint for GET method.";
         }
     }
+
+    public void handlePostEpicMethod(HttpExchange httpExchange) throws IOException {
+        String path = httpExchange.getRequestURI().getPath();
+
+        if (path.split("/").length == 2) {
+            InputStream inputStream = httpExchange.getRequestBody();
+            String body = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+            if (body.isEmpty()) {
+                statusCode = 400;
+                response = "Body request is empty.";
+            } else {
+                try {
+                    JsonObject jsonObject = JsonParser.parseString(body).getAsJsonObject();
+                    Epic epic = gson.fromJson(body, Epic.class);
+
+                    if (jsonObject.has("id") && epic.getId() != -1) {
+                        int taskId = epic.getId();
+                        taskManager.updateEpic(epic);
+                        response = "Epic with ID " + taskId + " was updated.";
+                        statusCode = 201;
+                    }
+
+                } catch (TaskOverlappingException exc) {
+                    statusCode = 406;
+                    response = "Can't update epic. It overlaps with another task.";
+                }
+            }
+        } else {
+            statusCode = 405;
+            response = "There is no such endpoint for POST method.";
+        }
+    }
+
 }

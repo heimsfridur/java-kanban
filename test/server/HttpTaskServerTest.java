@@ -320,4 +320,60 @@ public class HttpTaskServerTest {
 
         assertEquals(201, response.statusCode(), "StatusCode is incorrect.");
     }
+
+    @Test
+    public void shouldCreateNewSubtask() throws IOException, InterruptedException {
+        //5
+        Subtask subtask3Epic1 = new Subtask("subtask3Epic1", "subtask3Epic1_descr", epic1.getId(),
+                Status.NEW,
+                LocalDateTime.of(2028, 4, 16, 19, 30), Duration.ofMinutes(120));
+
+        HttpClient client = HttpClient.newHttpClient();
+        URI uri = URI.create("http://localhost:8080/subtasks");
+        HttpRequest request = HttpRequest.newBuilder()
+                .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(subtask3Epic1)))
+                .uri(uri)
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        assertEquals(201, response.statusCode(), "StatusCode is incorrect.");
+    }
+
+    @Test
+    public void shouldUpdateSubtasks() throws IOException, InterruptedException {
+        //5
+        Subtask subtask2Epic1New = new Subtask("subtask2Epic1", "subtask2Epic1_descr",
+                epic1.getId(), Status.DONE, subtask2Epic1.getId(),
+                LocalDateTime.of(2024, 4, 16, 19, 30), Duration.ofMinutes(120));
+
+        HttpClient client = HttpClient.newHttpClient();
+        URI uri = URI.create("http://localhost:8080/subtasks");
+        HttpRequest request = HttpRequest.newBuilder()
+                .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(subtask2Epic1New)))
+                .uri(uri)
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        assertEquals(201, response.statusCode(), "StatusCode is incorrect.");
+    }
+
+    @Test
+    public void shouldUpdateEpic() throws IOException, InterruptedException {
+            Epic epic1New = new Epic("epic1", "epic1_descr", epic1.getId());
+
+
+            HttpClient client = HttpClient.newHttpClient();
+            URI uri = URI.create("http://localhost:8080/epics");
+            HttpRequest request = HttpRequest.newBuilder()
+                    .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(epic1New)))
+                    .uri(uri)
+                    .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        assertEquals(201, response.statusCode(), "StatusCode is incorrect.");
+    }
+
 }
