@@ -1,14 +1,11 @@
 package server;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import exceptions.TaskOverlappingException;
 import model.Task;
-import server.adapters.DurationAdapter;
 import static server.HttpTaskServer.gson;
 import service.TaskManager;
 
@@ -16,7 +13,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 import java.util.regex.Pattern;
 
 public class TasksHandler implements HttpHandler {

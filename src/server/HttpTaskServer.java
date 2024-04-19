@@ -2,7 +2,6 @@ package server;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import model.Epic;
 import model.Status;
@@ -77,7 +76,8 @@ public class HttpTaskServer {
         httpServer.createContext("/tasks", new TasksHandler(taskManager));
         httpServer.createContext("/subtasks", new SubtasksHandler(taskManager));
         httpServer.createContext("/epics", new EpicsHandler(taskManager));
-
+        httpServer.createContext("/history", new HistoryHandler(taskManager));
+        httpServer.createContext("/prioritized", new PriorityHandler(taskManager));
 
         httpServer.start();
         System.out.println("Server is running on port: " + PORT);

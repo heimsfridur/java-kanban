@@ -6,18 +6,14 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import exceptions.TaskOverlappingException;
 import model.Subtask;
-import model.Task;
 import service.TaskManager;
 import static server.HttpTaskServer.gson;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
-
-import static server.HttpTaskServer.gson;
 
 public class SubtasksHandler implements HttpHandler {
     private TaskManager taskManager;

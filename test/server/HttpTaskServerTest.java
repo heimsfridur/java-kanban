@@ -24,6 +24,7 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -360,6 +361,24 @@ public class HttpTaskServerTest {
     }
 
     @Test
+    public void shouldCreateNewEpic() throws IOException, InterruptedException {
+        //5
+        Epic epicNew = new Epic("neeeew epic", "new rpic descr");
+
+
+        HttpClient client = HttpClient.newHttpClient();
+        URI uri = URI.create("http://localhost:8080/epics");
+        HttpRequest request = HttpRequest.newBuilder()
+                .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(epicNew)))
+                .uri(uri)
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        assertEquals(201, response.statusCode(), "StatusCode is incorrect.");
+    }
+
+    @Test
     public void shouldUpdateEpic() throws IOException, InterruptedException {
             Epic epic1New = new Epic("epic1", "epic1_descr", epic1.getId());
 
@@ -375,5 +394,48 @@ public class HttpTaskServerTest {
 
         assertEquals(201, response.statusCode(), "StatusCode is incorrect.");
     }
+
+    @Test
+    public void shouldGetHistory() throws IOException, InterruptedException {
+        taskManager.getTaskById(task1.getId());
+        taskManager.getEpicById(epic1.getId());
+
+        HttpClient client = HttpClient.newHttpClient();
+        URI uri = URI.create("http://localhost:8080/history");
+        HttpRequest request = HttpRequest.newBuilder()
+                .GET()
+                .uri(uri)
+                .build();
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        assertEquals(200, response.statusCode(), "StatusCode is incorrect.");
+
+        ArrayList<Task> history = gson.fromJson(response.body(), new TypeToken<ArrayList<Task>>(){}.getType());
+
+        assertEquals(2, history.size(), "Number of tasks in history is incorrect.");
+        assertEquals(task1, history.getFirst(), "First task in history is incorrect.");
+
+
+    }
+
+    @Test
+    public void shouldGetPrioritizedTasks() throws IOException, InterruptedException {
+        HttpClient client = HttpClient.newHttpClient();
+        URI uri = URI.create("http://localhost:8080/prioritized");
+        HttpRequest request = HttpRequest.newBuilder()
+                .GET()
+                .uri(uri)
+                .build();
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        assertEquals(200, response.statusCode(), "StatusCode is incorrect.");
+
+        List<Task> prioritizedTasks = gson.fromJson(response.body(), new TypeToken<List<Task>>(){}.getType());
+
+        assertEquals(4, prioritizedTasks.size(), "Number of tasks in prioritized tasks is incorrect.");
+        assertEquals(subtask1Epic1.getId(), prioritizedTasks.getFirst().getId(),
+                "First task in prioritized tasks is incorrect.");
+    }
+
 
 }

@@ -7,7 +7,6 @@ import com.sun.net.httpserver.HttpHandler;
 import exceptions.TaskOverlappingException;
 import model.Epic;
 import model.Subtask;
-import model.Task;
 import service.TaskManager;
 import static server.HttpTaskServer.gson;
 
@@ -17,8 +16,6 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
-
-import static server.HttpTaskServer.gson;
 
 public class EpicsHandler implements HttpHandler {
     private TaskManager taskManager;
@@ -146,8 +143,11 @@ public class EpicsHandler implements HttpHandler {
                         int taskId = epic.getId();
                         taskManager.updateEpic(epic);
                         response = "Epic with ID " + taskId + " was updated.";
-                        statusCode = 201;
+                    } else {
+                        taskManager.createEpic(epic);
+                        response = "Epic was created.";
                     }
+                    statusCode = 201;
 
                 } catch (TaskOverlappingException exc) {
                     statusCode = 406;
