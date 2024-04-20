@@ -6,6 +6,7 @@ import service.TaskManager;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
 import java.util.regex.Pattern;
 
 import static server.HttpTaskServer.gson;
@@ -20,7 +21,7 @@ public class HistoryHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
         String response = "";
-        int statusCode = 200;
+        int statusCode = HttpURLConnection.HTTP_OK;
 
         try {
             String method = httpExchange.getRequestMethod();
@@ -31,11 +32,11 @@ public class HistoryHandler implements HttpHandler {
                     response = gson.toJson(taskManager.getHistory());
 
                 } else {
-                    statusCode = 405;
+                    statusCode = HttpURLConnection.HTTP_BAD_METHOD;
                     response = "There is no such endpoint for GET method.";
                 }
             } else {
-                statusCode = 405;
+                statusCode = HttpURLConnection.HTTP_BAD_METHOD;
                 response = "There is no such endpoint.";
             }
 

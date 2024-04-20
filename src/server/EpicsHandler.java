@@ -13,6 +13,7 @@ import static server.HttpTaskServer.gson;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
@@ -25,7 +26,7 @@ public class EpicsHandler implements HttpHandler {
     public EpicsHandler(TaskManager taskManager) {
         this.taskManager = taskManager;
         this.response = "";
-        this.statusCode = 200;
+        this.statusCode = HttpURLConnection.HTTP_OK;
     }
 
     @Override
@@ -45,7 +46,7 @@ public class EpicsHandler implements HttpHandler {
                     handleDeleteEpicMethod(path);
                     break;
                 default: {
-                    statusCode = 405;
+                    statusCode = HttpURLConnection.HTTP_BAD_METHOD;
                     response = "There is no such endpoint.";
                     break;
                 }
@@ -73,7 +74,7 @@ public class EpicsHandler implements HttpHandler {
             String pathId = path.replaceFirst("/epics/", "");
             int id = parsePathId(pathId);
             if (id == -1) {
-                statusCode = 405;
+                statusCode = HttpURLConnection.HTTP_BAD_METHOD;
                 response = "The ID " + pathId + " for deletion is incorrect.";
             } else {
                 taskManager.removeEpicById(id);
@@ -90,14 +91,14 @@ public class EpicsHandler implements HttpHandler {
             String pathId = path.replaceFirst("/epics/", "");
             int id = parsePathId(pathId);
             if (id == -1) {
-                statusCode = 405;
+                statusCode = HttpURLConnection.HTTP_BAD_METHOD;
                 response = "ID " + pathId + " is incorrect";
             } else {
                 Epic epic = taskManager.getEpicById(id);
                 if (epic != null) {
                     response = gson.toJson(epic);
                 } else {
-                    statusCode = 404;
+                    statusCode = HttpURLConnection.HTTP_NOT_FOUND;
                     response = "Epic with ID " + id + " is not found.";
                 }
             }
@@ -107,7 +108,7 @@ public class EpicsHandler implements HttpHandler {
                     .replaceFirst("/subtasks$", "");
             int id = parsePathId(pathId);
             if (id == -1) {
-                statusCode = 405;
+                statusCode = HttpURLConnection.HTTP_BAD_METHOD;
                 response = "ID " + pathId + " is incorrect";
             } else {
                 Epic epic = taskManager.getEpicById(id);
@@ -115,12 +116,12 @@ public class EpicsHandler implements HttpHandler {
                     ArrayList<Subtask> subtasksFromEpic = taskManager.getSubtasksFromEpic(epic);
                     response = gson.toJson(subtasksFromEpic);
                 } else {
-                    statusCode = 404;
+                    statusCode = HttpURLConnection.HTTP_NOT_FOUND;
                     response = "Epic with ID " + id + " is not found.";
                 }
             }
         } else {
-            statusCode = 405;
+            statusCode = HttpURLConnection.HTTP_BAD_METHOD;
             response = "There is no such endpoint for GET method.";
         }
     }
@@ -132,7 +133,7 @@ public class EpicsHandler implements HttpHandler {
             InputStream inputStream = httpExchange.getRequestBody();
             String body = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
             if (body.isEmpty()) {
-                statusCode = 400;
+                statusCode = HttpURLConnection.HTTP_BAD_REQUEST;
                 response = "Body request is empty.";
             } else {
                 try {
@@ -147,15 +148,15 @@ public class EpicsHandler implements HttpHandler {
                         taskManager.createEpic(epic);
                         response = "Epic was created.";
                     }
-                    statusCode = 201;
+                    statusCode = HttpURLConnection.HTTP_CREATED;
 
                 } catch (TaskOverlappingException exc) {
-                    statusCode = 406;
+                    statusCode = HttpURLConnection.HTTP_NOT_ACCEPTABLE;
                     response = "Can't update epic. It overlaps with another task.";
                 }
             }
         } else {
-            statusCode = 405;
+            statusCode = HttpURLConnection.HTTP_BAD_METHOD;
             response = "There is no such endpoint for POST method.";
         }
     }

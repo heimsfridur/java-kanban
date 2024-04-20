@@ -32,11 +32,7 @@ public class HttpTaskServerTest {
     private HttpTaskServer httpTaskServer;
     private TaskManager taskManager;
 
-    private Gson gson = new GsonBuilder()
-        .setPrettyPrinting()
-        .registerTypeAdapter(Duration.class, new DurationAdapter())
-        .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
-        .create();
+    private Gson gson = Managers.getGson();
     private Task task1;
     private Task task2;
     private Subtask subtask1Epic1;

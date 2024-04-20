@@ -1,14 +1,11 @@
 package server;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.sun.net.httpserver.HttpServer;
 import model.Epic;
 import model.Status;
 import model.Subtask;
 import model.Task;
-import server.adapters.DurationAdapter;
-import server.adapters.LocalDateTimeAdapter;
 import service.Managers;
 import service.TaskManager;
 
@@ -26,20 +23,12 @@ public class HttpTaskServer {
 
     public HttpTaskServer(TaskManager taskManager) throws IOException {
         this.taskManager = taskManager;
-        this.gson = new GsonBuilder()
-                .setPrettyPrinting()
-                .registerTypeAdapter(Duration.class, new DurationAdapter())
-                .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
-                .create();
+        this.gson = Managers.getGson();
     }
 
     public HttpTaskServer() throws IOException {
         this.taskManager = Managers.getDefault();
-        this.gson = new GsonBuilder()
-                .setPrettyPrinting()
-                .registerTypeAdapter(Duration.class, new DurationAdapter())
-                .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
-                .create();
+        this.gson = Managers.getGson();
     }
 
 
