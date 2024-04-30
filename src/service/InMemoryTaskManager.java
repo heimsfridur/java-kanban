@@ -247,20 +247,6 @@ public class InMemoryTaskManager implements TaskManager {
 
     private void addToPrioritizedTasks(Task task) {
         if (task.getStartTime() != null) {
-            //удаляем объект из TreeSet (на случай обновления тасков)
-            /*int id = task.getId();
-            Task oldTask = null;
-
-            if (task instanceof Subtask) {
-                oldTask = subtaskHashMap.get(id);
-            } else if (task instanceof Task) {
-                oldTask = taskHashMap.get(id);
-            }
-
-            if (oldTask != null)  {
-                prioritizedTasks.remove(oldTask);
-            } */
-
             if (validateOverlapping(task)) {
                 throw new TaskOverlappingException("Tasks are overlapping.");
             }
